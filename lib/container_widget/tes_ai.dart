@@ -1,190 +1,154 @@
 import 'package:flutter/material.dart';
 
-class TesAi extends StatelessWidget {
+// Halaman Formulir Utama
+class TesAi extends StatefulWidget {
   const TesAi({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const InstagramHomeScreen(),
-    );
-  }
+  State<TesAi> createState() => _FormScreenState();
 }
 
-class InstagramHomeScreen extends StatelessWidget {
-  const InstagramHomeScreen({super.key});
+class _FormScreenState extends State<TesAi> {
+  // GlobalKey untuk validasi Form
+  final _formKey = GlobalKey<FormState>();
+
+  // Controller untuk menangkap input teks
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Wajib dispose controller untuk mencegah memory leak
+    _nameController.dispose();
+    _dateController.dispose();
+    super.dispose();
+  }
+
+  // Fungsi untuk menampilkan DatePicker
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        // Format tanggal sederhana: YYYY-MM-DD
+        _dateController.text = "${picked.toLocal()}".split(' ')[0];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5F0F6,
-      ), // Warna background soft agak keunguan sesuai gambar
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        title: const Text(
-          'Instagram Layout',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // ================= SECTION 1: STORY (HORIZONTAL SCROLL) =================
-            Container(
-              height: 110,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              color: const Color(0xFFF5F0F6),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Column(
-                      children: [
-                        // Circle Avatar Story
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.grey.shade400,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: CircleAvatar(
-                            radius: 28,
-                            backgroundImage: NetworkImage(
-                              'https://picsum.photos/seed/story_$index/200',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        // Text Label Story
-                        Text(
-                          'Story ${index + 1}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  );
+      appBar: AppBar(title: const Text('Formulir Pendaftaran')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              // Input Nama (Menggunakan Controller)
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Lengkap',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nama tidak boleh kosong';
+                  }
+                  return null;
                 },
               ),
+              const SizedBox(height: 16),
+
+              // Input Tanggal Lahir (Menggunakan DatePicker & Controller)
+              TextFormField(
+                controller: _dateController,
+                readOnly: true, // Agar keyboard tidak muncul saat diklik
+                decoration: const InputDecoration(
+                  labelText: 'Tanggal Lahir',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.calendar_today),
+                ),
+                onTap: () {
+                  _selectDate(context); // Panggil DatePicker saat field ditekan
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Tanggal lahir harus dipilih';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Tombol Submit & Passing Data
+              ElevatedButton(
+                onPressed: () {
+                  // Validasi form
+                  if (_formKey.currentState!.validate()) {
+                    // Ambil data dari controller
+                    String nama = _nameController.text;
+                    String tanggalLahir = _dateController.text;
+
+                    // Passing data ke Halaman Hasil (ResultScreen)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ResultScreen(name: nama, birthDate: tanggalLahir),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Kirim Data'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman Tujuan untuk Menerima Passing Data
+class ResultScreen extends StatelessWidget {
+  final String name;
+  final String birthDate;
+
+  const ResultScreen({super.key, required this.name, required this.birthDate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Data Diterima')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Data Berhasil Dikirim:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-
-            const Divider(height: 1, thickness: 1, color: Colors.black12),
-            const SizedBox(height: 10),
-
-            // ================= SECTION 2: FEED POST (VERTICAL SCROLL) =================
-            ListView.builder(
-              shrinkWrap: true, // Agar ListView mengikuti tinggi konten
-              physics: const NeverScrollableScrollPhysics(), // Scroll ditangani oleh SingleChildScrollView
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      16,
-                    ), // Rounded Card sesuai contoh
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 5,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ----- HEADER POST -----
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundImage: NetworkImage(
-                                'https://picsum.photos/seed/user_$index/200',
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'user_${index + 1}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  const Text(
-                                    'Bandung, Indonesia',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.more_vert),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // ----- MEDIA GAMBAR POST -----
-                      ClipRRect(
-                        child: Image.network(
-                          'https://picsum.photos/seed/post_$index/500/400',
-                          height: 300,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-                      // ----- ACTION BUTTONS (LIKE, COMMENT, BOOKMARK) -----
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.favorite_border),
-                              onPressed: () {},
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.chat_bubble_outline),
-                              onPressed: () {},
-                            ),
-                            const Spacer(), // Mendorong icon bookmark ke ujung kanan
-                            IconButton(
-                              icon: const Icon(Icons.bookmark_border),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+            const SizedBox(height: 16),
+            Text('Nama: $name', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text(
+              'Tanggal Lahir: $birthDate',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Kembali ke halaman formulir
               },
+              child: const Text('Kembali'),
             ),
           ],
         ),
