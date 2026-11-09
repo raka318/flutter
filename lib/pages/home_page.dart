@@ -5,6 +5,7 @@ import 'package:rpl2/pages/about_page.dart';
 import 'package:rpl2/listview/ListView.dart';
 import 'package:rpl2/gridview/GridView.dart';
 import 'package:rpl2/pages/formulir_page.dart';
+import 'package:rpl2/pages/input_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -94,6 +95,19 @@ class HomePage extends StatelessWidget {
               );
             },
             child: Text('Pergi Formulir Page'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return BelajarForm();
+                  },
+                ),
+              );
+            },
+            child: Text('Pergi Input Page'),
           ),
         ],
       ),

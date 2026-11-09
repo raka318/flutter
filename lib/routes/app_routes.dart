@@ -6,6 +6,7 @@ import 'package:rpl2/pages/about_page.dart';
 import 'package:rpl2/pages/formulir_page.dart';
 import 'package:rpl2/pages/home_page.dart';
 import 'package:rpl2/listview/ListView.dart';
+import 'package:rpl2/pages/input_page.dart';
 
 class AppRoutes {
   static const home = '/';
@@ -15,6 +16,7 @@ class AppRoutes {
   static const container = '/container';
   static const instagram = '/instagram';
   static const formulir = '/formulir';
+  static const input = '/input';
 
   static Map<String, WidgetBuilder> routes = {
     home: (context) => HomePage(),
@@ -24,5 +26,6 @@ class AppRoutes {
     container: (context) => ContainerLatihan(),
     instagram: (context) => LayoutInstagram(),
     formulir: (context) => FormulirPage(),
+    input: (context) => BelajarForm(),
   };
 }
