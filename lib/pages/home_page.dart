@@ -6,6 +6,7 @@ import 'package:rpl2/listview/ListView.dart';
 import 'package:rpl2/gridview/GridView.dart';
 import 'package:rpl2/pages/formulir_page.dart';
 import 'package:rpl2/pages/input_page.dart';
+import 'package:rpl2/cinema/halaman_daftar_film.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -108,6 +109,19 @@ class HomePage extends StatelessWidget {
               );
             },
             child: Text('Pergi Input Page'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return FilmListPage();
+                  },
+                ),
+              );
+            },
+            child: Text('Halaman Daftar Film'),
           ),
         ],
       ),
